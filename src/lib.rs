@@ -175,7 +175,7 @@ impl Icmp {
             if idt != self.idt {
                 continue;
             }
-            let resp = Response::decode(&dat, ip_hdr_len);
+            let resp = Response::decode(dat, ip_hdr_len);
 
             return Ok((len, addr, resp));
         }
@@ -194,11 +194,8 @@ impl Icmp {
 
 pub fn checksum(bytes: &[u8]) -> u16 {
     let mut sum = 0u32;
-    let skip = 1;
-    bytes.chunks_exact(2).enumerate().for_each(|(i, buf)| {
-        if i != skip {
-            sum += u16::from_be_bytes(buf.try_into().unwrap()) as u32;
-        }
+    bytes.chunks_exact(2).skip(1).for_each(|buf| {
+        sum += u16::from_be_bytes(buf.try_into().unwrap()) as u32;
     });
 
     while sum >> 16 != 0 {
